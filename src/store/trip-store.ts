@@ -64,7 +64,6 @@ export const useTripStore = create<TripState>()(
       partialize: (state) => ({
         quizAnswers: state.quizAnswers,
         currentStep: state.currentStep,
-        isQuizComplete: state.isQuizComplete,
       }),
     }
   )

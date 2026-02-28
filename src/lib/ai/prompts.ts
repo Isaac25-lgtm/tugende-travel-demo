@@ -13,6 +13,7 @@ CRITICAL RULES:
 6. Mention difficulty levels and physical requirements where relevant.
 7. Personalize the "whyThisFitsYou" notes based on the traveler's stated preferences.
 8. If a destination requires permits, mention it in travelNotes.
+9. If the traveler requested a SPECIFIC destination or place, you MUST prioritize it. If that exact destination is in the shortlist, make it the centerpiece of the itinerary. If it is NOT in the shortlist, acknowledge this clearly in "overallWhyThisTrip" by saying something like "Note: [requested place] is not currently in our curated database, but here are the closest alternatives..." and include nearby or thematically similar destinations.
 
 OUTPUT FORMAT:
 Return a single JSON object with this structure:
@@ -23,7 +24,7 @@ Return a single JSON object with this structure:
 }`;
 }
 
-export function buildUserPrompt(answers: QuizAnswers, rankedDestinations: ScoredDestination[]): string {
+export function buildUserPrompt(answers: QuizAnswers, rankedDestinations: ScoredDestination[], heroQuery?: string): string {
   const destList = rankedDestinations.map((sd, i) => {
     const d = sd.destination;
     return `${i + 1}. ${d.name} (ID: ${d.id})
@@ -46,6 +47,14 @@ export function buildUserPrompt(answers: QuizAnswers, rankedDestinations: Scored
     'two-weeks': '12 days',
   };
 
+  const specificRequest = heroQuery
+    ? `\nSPECIFIC REQUEST FROM TRAVELER: "${heroQuery}"
+IMPORTANT: The traveler specifically asked for this. You MUST address it directly:
+- If a destination matching this request is in the shortlist below, it MUST be included and featured prominently in the itinerary.
+- If no destination in the shortlist matches this request, you MUST acknowledge it in "overallWhyThisTrip" by clearly stating: "We don't currently have [their request] in our curated database. Here's what we recommend instead based on your preferences..." Then build the best alternative itinerary from the available destinations.
+- NEVER silently ignore the traveler's specific request.\n`
+    : '';
+
   return `TRAVELER PROFILE:
 - Origin: ${answers.origin}
 - Group: ${answers.groupType}
@@ -54,7 +63,7 @@ export function buildUserPrompt(answers: QuizAnswers, rankedDestinations: Scored
 - Interests: ${answers.interests.join(', ')}
 - Travel Month: ${answers.travelMonth ? `Month ${answers.travelMonth}` : 'Flexible'}
 - Style: ${answers.travelStyle}
-
+${specificRequest}
 RANKED DESTINATION SHORTLIST (use these only):
 ${destList}
 

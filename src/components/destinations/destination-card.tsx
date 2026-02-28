@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { MapPin, Clock, Star, AlertTriangle, Mountain } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -16,10 +17,11 @@ export function DestinationCard({ destination, onClick }: DestinationCardProps) 
   const d = destination;
 
   return (
+    <Link href={`/explore/${d.id}`}>
     <motion.div
       whileHover={cardHover}
       onClick={onClick}
-      className="group rounded-xl overflow-hidden bg-surface shadow-card cursor-pointer"
+      className="group rounded-xl overflow-hidden bg-surface shadow-card cursor-pointer h-full"
     >
       {/* Image */}
       <div className="relative h-48 overflow-hidden">
@@ -88,5 +90,6 @@ export function DestinationCard({ destination, onClick }: DestinationCardProps) 
         </div>
       </div>
     </motion.div>
+    </Link>
   );
 }

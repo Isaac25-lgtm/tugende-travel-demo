@@ -99,9 +99,28 @@ export function scoreDestination(dest: Destination, answers: QuizAnswers): Score
 export function rankDestinations(
   destinations: Destination[],
   answers: QuizAnswers,
-  limit: number = 7
+  limit: number = 7,
+  heroQuery?: string
 ): ScoredDestination[] {
   const scored = destinations.map(d => scoreDestination(d, answers));
+
+  // If the user searched for a specific destination, boost matching ones to the top
+  if (heroQuery) {
+    const query = heroQuery.toLowerCase();
+    for (const sd of scored) {
+      const name = sd.destination.name.toLowerCase();
+      const id = sd.destination.id.toLowerCase();
+      const region = sd.destination.region.toLowerCase();
+      if (name.includes(query) || id.includes(query) || query.includes(name) || query.includes(id)) {
+        // Exact or close match — guarantee it appears at the top
+        sd.score = Math.max(sd.score, 99);
+      } else if (region.includes(query) || sd.destination.summary.toLowerCase().includes(query)) {
+        // Regional or thematic match — boost significantly
+        sd.score = Math.max(sd.score, sd.score + 20);
+      }
+    }
+  }
+
   scored.sort((a, b) => b.score - a.score);
   return scored.slice(0, limit);
 }

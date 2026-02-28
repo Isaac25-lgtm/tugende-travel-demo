@@ -110,6 +110,7 @@ export function FeaturedDestinations() {
 
   return (
     <motion.div
+      key={persona}
       variants={staggerContainer}
       initial="hidden"
       whileInView="visible"

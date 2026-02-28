@@ -8,7 +8,7 @@ import { Navbar } from '@/components/layout/navbar';
 import { Chip } from '@/components/ui/chip';
 import { Badge } from '@/components/ui/badge';
 import { X, MapPin, Clock, DollarSign } from 'lucide-react';
-import { destinations } from '@/data/seed-destinations';
+import { allDestinations as destinations } from '@/data/seed-destinations';
 import { CATEGORY_COLORS, CATEGORY_LABELS, MAPBOX_CENTER, MAPBOX_ZOOM } from '@/lib/utils/constants';
 import type { Destination, DestinationCategory } from '@/types/destination';
 

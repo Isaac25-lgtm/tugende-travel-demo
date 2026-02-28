@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { Search, ArrowRight, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { heroImageVariant, fadeInUp } from '@/lib/utils/motion';
+import { allDestinations } from '@/data/seed-destinations';
 
 export function HeroSection() {
   const [query, setQuery] = useState('');
@@ -62,7 +63,8 @@ export function HeroSection() {
 
           {/* Subtitle */}
           <p className="mt-5 text-base sm:text-lg md:text-xl text-white/80 max-w-2xl mx-auto leading-relaxed">
-            Plan personalized trips with AI. From gorilla trekking in Bwindi to rafting the Nile —
+            Plan personalized trips with AI across {allDestinations.length}+ destinations.
+            From gorilla trekking in Bwindi to rafting the Nile —
             tailored to your style, budget, and timeline.
           </p>
 

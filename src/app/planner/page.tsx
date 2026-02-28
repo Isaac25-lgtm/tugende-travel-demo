@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useEffect, useCallback } from 'react';
+import { Suspense, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
@@ -27,14 +27,18 @@ function PlannerContent() {
   const searchParams = useSearchParams();
   const heroQuery = searchParams.get('q');
 
+  const generatingRef = useRef(false);
+
   const generateTrip = useCallback(async () => {
+    if (generatingRef.current) return;
+    generatingRef.current = true;
     try {
       setIsGenerating(true);
       setGenerationError(null);
       const response = await fetch('/api/itinerary', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ answers: quizAnswers as QuizAnswers }),
+        body: JSON.stringify({ answers: quizAnswers as QuizAnswers, heroQuery: heroQuery || undefined }),
       });
 
       if (response.status === 429) {
@@ -56,14 +60,17 @@ function PlannerContent() {
       setGenerationError(
         error instanceof Error ? error.message : 'Failed to generate itinerary. Please try again.'
       );
+    } finally {
+      generatingRef.current = false;
     }
-  }, [quizAnswers, setItinerary, setIsGenerating, setGenerationError]);
+  }, [quizAnswers, heroQuery, setItinerary, setIsGenerating, setGenerationError]);
 
+  // Trigger generation when quiz is complete and no itinerary exists
   useEffect(() => {
-    if (isQuizComplete && isGenerating && !itinerary && !generationError) {
+    if (isQuizComplete && !itinerary && !generationError) {
       generateTrip();
     }
-  }, [isQuizComplete, isGenerating, itinerary, generationError, generateTrip]);
+  }, [isQuizComplete, itinerary, generationError, generateTrip]);
 
   return (
     <>
@@ -119,7 +126,7 @@ function PlannerContent() {
 
 export default function PlannerPage() {
   return (
-    <Suspense>
+    <Suspense fallback={<div className="min-h-screen bg-bg-light" />}>
       <PlannerContent />
     </Suspense>
   );

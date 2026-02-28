@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { MapPin, Clock, DollarSign, AlertTriangle, CheckCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { destinations } from '@/data/seed-destinations';
+import { allDestinations as destinations } from '@/data/seed-destinations';
 import type { ItineraryDay } from '@/types/itinerary';
 import { formatRange } from '@/lib/utils/formatters';
 

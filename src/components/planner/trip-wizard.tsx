@@ -174,7 +174,11 @@ export function TripWizard() {
             title={currentConfig.title}
             subtitle={currentConfig.subtitle}
             options={currentConfig.options}
-            selected={quizAnswers[currentConfig.field] as string | string[] | undefined}
+            selected={
+              currentConfig.field === 'travelMonth' && typeof quizAnswers.travelMonth === 'number'
+                ? String(quizAnswers.travelMonth)
+                : quizAnswers[currentConfig.field] as string | string[] | undefined
+            }
             onSelect={handleSelect}
             multiSelect={currentConfig.multiSelect}
             direction={direction}

@@ -16,7 +16,8 @@ interface GeminiResponse {
 
 export async function generateItinerary(
   answers: QuizAnswers,
-  rankedDestinations: ScoredDestination[]
+  rankedDestinations: ScoredDestination[],
+  heroQuery?: string
 ): Promise<GeneratedItineraryResponse | null> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
@@ -25,7 +26,7 @@ export async function generateItinerary(
   }
 
   const systemPrompt = buildSystemPrompt();
-  const userPrompt = buildUserPrompt(answers, rankedDestinations);
+  const userPrompt = buildUserPrompt(answers, rankedDestinations, heroQuery);
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 30_000);

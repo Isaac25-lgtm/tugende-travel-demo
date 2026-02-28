@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import type { QuizAnswers } from '@/types/quiz';
-import { destinations } from '@/data/seed-destinations';
+import { allDestinations as destinations } from '@/data/seed-destinations';
 import { rankDestinations } from '@/lib/scoring/recommendation-engine';
 import { generateItinerary } from '@/lib/ai/gemini';
 import { findCachedItinerary } from '@/data/cached-itineraries';
@@ -56,12 +56,13 @@ export async function POST(request: Request) {
     }
 
     const answers: QuizAnswers = parseResult.data;
+    const heroQuery: string | undefined = typeof body.heroQuery === 'string' ? body.heroQuery.slice(0, 200) : undefined;
 
     // Step 1: Score and rank destinations
-    const ranked = rankDestinations(destinations, answers, 7);
+    const ranked = rankDestinations(destinations, answers, 7, heroQuery);
 
     // Step 2: Try Gemini AI generation (Level 1 fallback)
-    let itinerary = await generateItinerary(answers, ranked);
+    let itinerary = await generateItinerary(answers, ranked, heroQuery);
 
     // Step 3: If AI fails, use cached itinerary (Level 2 fallback)
     if (!itinerary) {
