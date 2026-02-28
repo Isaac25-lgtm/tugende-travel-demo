@@ -56,6 +56,9 @@ export function WizardStep({ title, subtitle, options, selected, onSelect, multi
           <button
             key={option.value}
             onClick={() => onSelect(option.value)}
+            role={multiSelect ? 'checkbox' : 'radio'}
+            aria-checked={isSelected(option.value)}
+            aria-label={option.description ? `${option.label}: ${option.description}` : option.label}
             className={cn(
               'relative flex flex-col items-center gap-2 p-4 md:p-5 rounded-xl border-2 transition-all duration-200 cursor-pointer',
               'min-h-[80px] text-center',
@@ -67,7 +70,7 @@ export function WizardStep({ title, subtitle, options, selected, onSelect, multi
           >
             {option.image && (
               <div className="w-full h-20 rounded-lg overflow-hidden mb-1">
-                <img src={option.image} alt="" className="w-full h-full object-cover" />
+                <img src={option.image} alt={option.label} className="w-full h-full object-cover" />
               </div>
             )}
             {option.icon && (

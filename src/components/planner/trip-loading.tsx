@@ -6,12 +6,18 @@ import { LOADING_MESSAGES } from '@/lib/utils/constants';
 
 export function TripLoading() {
   const [messageIndex, setMessageIndex] = useState(0);
+  const [showTimeout, setShowTimeout] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setMessageIndex((prev) => (prev + 1) % LOADING_MESSAGES.length);
     }, 2500);
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setShowTimeout(true), 25_000);
+    return () => clearTimeout(timeout);
   }, []);
 
   return (
@@ -70,6 +76,17 @@ export function TripLoading() {
           />
         ))}
       </div>
+
+      {/* Timeout message */}
+      {showTimeout && (
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="mt-6 text-sm text-text-muted text-center max-w-sm"
+        >
+          This is taking longer than expected. The AI is still working on your perfect itinerary...
+        </motion.p>
+      )}
     </div>
   );
 }

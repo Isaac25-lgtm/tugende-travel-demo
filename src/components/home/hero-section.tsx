@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Search, ArrowRight, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,6 +10,13 @@ import { heroImageVariant, fadeInUp } from '@/lib/utils/motion';
 
 export function HeroSection() {
   const [query, setQuery] = useState('');
+  const router = useRouter();
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      router.push(`/planner${query ? `?q=${encodeURIComponent(query)}` : ''}`);
+    }
+  };
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
@@ -66,12 +74,15 @@ export function HeroSection() {
             className="mt-8 max-w-xl mx-auto"
           >
             <div className="relative group">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50 group-focus-within:text-gold transition-colors" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50 group-focus-within:text-gold transition-colors" aria-hidden="true" />
               <input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={handleKeyDown}
                 placeholder="e.g. A 4-day budget wildlife trip near Kampala..."
+                aria-label="Describe your ideal Uganda trip"
+                maxLength={200}
                 className="w-full pl-12 pr-28 py-4 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white placeholder:text-white/40 text-base focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/50 transition-all"
               />
               <Link

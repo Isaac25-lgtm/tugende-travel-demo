@@ -168,6 +168,8 @@ export default function BestTimePage() {
                 key={i}
                 variants={fadeInUp}
                 onClick={() => setSelectedMonth(selectedMonth === i ? null : i)}
+                aria-label={`${getMonthFullName(i + 1)}: ${month.label} (${month.score}/5), ${month.season} season. ${month.notes}`}
+                aria-pressed={selectedMonth === i}
                 className={`p-3 md:p-4 rounded-xl border-2 text-center transition-all cursor-pointer ${scoreColors[month.score]} ${selectedMonth === i ? 'ring-2 ring-primary ring-offset-2' : ''}`}
               >
                 <p className="text-xs font-semibold uppercase tracking-wide">{getMonthFullName(i + 1).slice(0, 3)}</p>

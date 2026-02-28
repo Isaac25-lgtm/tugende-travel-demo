@@ -39,7 +39,7 @@ export default function HomePage() {
       <Section dark>
         <SectionHeading
           title="Travelers Love Tugende"
-          subtitle="Real experiences from people who discovered Uganda their way"
+          subtitle="Experiences from people who discovered Uganda their way"
           light
         />
         <SocialProof />

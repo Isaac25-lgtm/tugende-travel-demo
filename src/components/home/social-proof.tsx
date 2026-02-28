@@ -16,7 +16,7 @@ const testimonials = [
     name: 'Daniel Mukasa',
     location: 'Kampala, Uganda',
     quote: 'Finally a travel app that understands local travelers too. Found amazing weekend spots I never knew about.',
-    rating: 5,
+    rating: 4,
     avatar: 'D',
   },
   {

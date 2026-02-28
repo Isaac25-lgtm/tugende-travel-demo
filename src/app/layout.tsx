@@ -15,9 +15,35 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'Tugende — Uganda\'s AI Travel Companion',
-  description: 'Discover Uganda intelligently. Plan based on your style and budget. Decide with visual confidence.',
-  keywords: ['Uganda', 'travel', 'safari', 'gorilla trekking', 'AI travel planner', 'Tugende'],
+  title: {
+    default: 'Tugende — Uganda\'s AI Travel Companion',
+    template: '%s | Tugende',
+  },
+  description: 'Discover Uganda intelligently. Plan personalized trips with AI — from gorilla trekking in Bwindi to rafting the Nile.',
+  keywords: ['Uganda', 'travel', 'safari', 'gorilla trekking', 'AI travel planner', 'Tugende', 'Uganda tourism', 'trip planner'],
+  openGraph: {
+    title: 'Tugende — Uganda\'s AI Travel Companion',
+    description: 'Plan personalized Uganda trips with AI. Gorilla trekking, safari, adventure — tailored to your style and budget.',
+    siteName: 'Tugende',
+    locale: 'en_US',
+    type: 'website',
+    images: [
+      {
+        url: 'https://images.unsplash.com/photo-1516426122078-c23e76319801?w=1200&h=630&q=80',
+        width: 1200,
+        height: 630,
+        alt: 'Uganda landscape — Tugende AI Travel Companion',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Tugende — Uganda\'s AI Travel Companion',
+    description: 'Plan personalized Uganda trips with AI. Gorilla trekking, safari, adventure — tailored to your style and budget.',
+  },
+  icons: {
+    icon: '/favicon.ico',
+  },
 };
 
 export default function RootLayout({

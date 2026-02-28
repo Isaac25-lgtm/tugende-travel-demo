@@ -32,6 +32,11 @@ export function Slider({ label, value, min, max, step = 1, onChange, formatValue
           step={step}
           value={value}
           onChange={(e) => onChange(Number(e.target.value))}
+          aria-label={label}
+          aria-valuemin={min}
+          aria-valuemax={max}
+          aria-valuenow={value}
+          aria-valuetext={formatValue ? formatValue(value) : String(value)}
           className="w-full h-2 rounded-full appearance-none cursor-pointer
             [&::-webkit-slider-thumb]:appearance-none
             [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5

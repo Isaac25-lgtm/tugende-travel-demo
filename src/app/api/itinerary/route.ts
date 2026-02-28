@@ -1,18 +1,61 @@
 import { NextResponse } from 'next/server';
+import { z } from 'zod';
 import type { QuizAnswers } from '@/types/quiz';
 import { destinations } from '@/data/seed-destinations';
 import { rankDestinations } from '@/lib/scoring/recommendation-engine';
 import { generateItinerary } from '@/lib/ai/gemini';
 import { findCachedItinerary } from '@/data/cached-itineraries';
 
+// In-memory rate limiter (per IP, 5 requests per minute)
+const rateLimit = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT_WINDOW = 60_000;
+const RATE_LIMIT_MAX = 5;
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const entry = rateLimit.get(ip);
+  if (!entry || now > entry.resetTime) {
+    rateLimit.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
+    return true;
+  }
+  if (entry.count >= RATE_LIMIT_MAX) return false;
+  entry.count++;
+  return true;
+}
+
+const quizAnswersSchema = z.object({
+  origin: z.enum(['international', 'ugandan']),
+  groupType: z.enum(['solo', 'couple', 'family', 'friends', 'group']),
+  duration: z.enum(['weekend', '3-5-days', 'one-week', 'two-weeks']),
+  budgetStyle: z.enum(['budget', 'mid-range', 'premium', 'luxury']),
+  interests: z.array(z.enum(['wildlife', 'adventure', 'culture', 'relaxation', 'nature', 'photography'])).min(1),
+  travelMonth: z.number().min(1).max(12).optional(),
+  travelStyle: z.enum(['backpacker', 'comfortable', 'luxury']),
+});
+
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const answers: QuizAnswers = body.answers;
-
-    if (!answers || !answers.origin || !answers.groupType) {
-      return NextResponse.json({ error: 'Invalid quiz answers' }, { status: 400 });
+    // Rate limiting
+    const forwarded = request.headers.get('x-forwarded-for');
+    const ip = forwarded?.split(',')[0]?.trim() || 'unknown';
+    if (!checkRateLimit(ip)) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please wait a moment and try again.' },
+        { status: 429 }
+      );
     }
+
+    const body = await request.json();
+    const parseResult = quizAnswersSchema.safeParse(body.answers);
+
+    if (!parseResult.success) {
+      return NextResponse.json(
+        { error: 'Invalid quiz answers. Please complete all steps.' },
+        { status: 400 }
+      );
+    }
+
+    const answers: QuizAnswers = parseResult.data;
 
     // Step 1: Score and rank destinations
     const ranked = rankDestinations(destinations, answers, 7);
@@ -22,14 +65,12 @@ export async function POST(request: Request) {
 
     // Step 3: If AI fails, use cached itinerary (Level 2 fallback)
     if (!itinerary) {
-      console.log('Gemini failed, falling back to cached itinerary');
       const profileKey = `${answers.interests?.[0] || 'adventure'}-${answers.groupType}-${answers.duration === 'one-week' ? 'week' : answers.duration}`;
       itinerary = findCachedItinerary(profileKey);
     }
 
     // Step 4: If cached fails, build rule-based (Level 3 fallback)
     if (!itinerary) {
-      console.log('Cached fallback failed, using rule-based generation');
       itinerary = buildRuleBasedItinerary(ranked, answers);
     }
 

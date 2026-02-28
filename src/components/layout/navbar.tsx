@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, MapPin, Compass, Calculator, Calendar, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
@@ -17,12 +18,24 @@ const navLinks = [
 
 export function Navbar() {
   const { isScrolled, setIsScrolled, isMobileMenuOpen, setMobileMenuOpen } = useUIStore();
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [setIsScrolled]);
+
+  // Close mobile menu on Escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isMobileMenuOpen) {
+        setMobileMenuOpen(false);
+      }
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [isMobileMenuOpen, setMobileMenuOpen]);
 
   return (
     <>
@@ -53,20 +66,26 @@ export function Navbar() {
 
             {/* Desktop Nav */}
             <div className="hidden md:flex items-center gap-1">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={cn(
-                    'px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                    isScrolled
-                      ? 'text-text-secondary hover:text-primary hover:bg-bg-light'
-                      : 'text-white/80 hover:text-white hover:bg-white/10'
-                  )}
-                >
-                  {link.label}
-                </Link>
-              ))}
+              {navLinks.map((link) => {
+                const isActive = pathname === link.href;
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    aria-current={isActive ? 'page' : undefined}
+                    className={cn(
+                      'px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                      isActive
+                        ? (isScrolled ? 'text-primary bg-primary/10 font-semibold' : 'text-gold font-semibold')
+                        : (isScrolled
+                            ? 'text-text-secondary hover:text-primary hover:bg-bg-light'
+                            : 'text-white/80 hover:text-white hover:bg-white/10')
+                    )}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
               <Link
                 href="/planner"
                 className="ml-2 px-4 py-2 rounded-lg bg-gold text-bg-dark text-sm font-semibold hover:bg-gold-light transition-colors"
@@ -82,7 +101,8 @@ export function Navbar() {
                 'md:hidden p-2 rounded-lg transition-colors',
                 isScrolled ? 'text-text-primary hover:bg-bg-light' : 'text-white hover:bg-white/10'
               )}
-              aria-label="Toggle menu"
+              aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={isMobileMenuOpen}
             >
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -99,6 +119,8 @@ export function Navbar() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             className="fixed inset-0 z-40 bg-bg-dark/95 backdrop-blur-sm md:hidden"
+            role="dialog"
+            aria-label="Navigation menu"
           >
             <motion.div
               initial={{ opacity: 0, y: -20 }}
@@ -109,12 +131,17 @@ export function Navbar() {
             >
               {navLinks.map((link) => {
                 const Icon = link.icon;
+                const isActive = pathname === link.href;
                 return (
                   <Link
                     key={link.href}
                     href={link.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 text-white/90 hover:text-gold text-xl font-medium transition-colors"
+                    aria-current={isActive ? 'page' : undefined}
+                    className={cn(
+                      'flex items-center gap-3 text-xl font-medium transition-colors',
+                      isActive ? 'text-gold' : 'text-white/90 hover:text-gold'
+                    )}
                   >
                     <Icon className="w-5 h-5" />
                     {link.label}

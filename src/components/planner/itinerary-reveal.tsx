@@ -1,7 +1,8 @@
 'use client';
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Share2, Download, MessageCircle, RotateCcw } from 'lucide-react';
+import { Share2, Download, MessageCircle, RotateCcw, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ItineraryCard } from './itinerary-card';
 import { TripSummary } from './trip-summary';
@@ -11,8 +12,44 @@ import { fadeInUp } from '@/lib/utils/motion';
 
 export function ItineraryReveal() {
   const { itinerary, resetQuiz } = useTripStore();
+  const [shareStatus, setShareStatus] = useState<string | null>(null);
 
   if (!itinerary) return null;
+
+  const handleRequestTrip = () => {
+    const subject = encodeURIComponent(
+      `Trip Inquiry: ${itinerary.summary.totalDays}-Day Uganda Adventure`
+    );
+    const body = encodeURIComponent(
+      `Hi,\n\nI used Tugende to plan a ${itinerary.summary.totalDays}-day trip to Uganda.\n\n` +
+      `${itinerary.summary.overallWhyThisTrip}\n\n` +
+      `Estimated budget: $${itinerary.summary.totalBudgetUSD.min} - $${itinerary.summary.totalBudgetUSD.max}\n\n` +
+      `Destinations: ${itinerary.days.map(d => d.title).join(', ')}\n\n` +
+      `I would like to discuss booking this trip. Please reach out at your earliest convenience.\n\nThank you!`
+    );
+    window.open(`mailto:info@tugende.ug?subject=${subject}&body=${body}`, '_blank');
+  };
+
+  const handleShareTrip = async () => {
+    const shareData = {
+      title: `My ${itinerary.summary.totalDays}-Day Uganda Trip`,
+      text: itinerary.summary.overallWhyThisTrip,
+      url: window.location.href,
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(
+          `${shareData.title}\n${shareData.text}\n${shareData.url}`
+        );
+        setShareStatus('Copied!');
+        setTimeout(() => setShareStatus(null), 2000);
+      }
+    } catch {
+      // User cancelled share dialog
+    }
+  };
 
   return (
     <motion.div
@@ -65,13 +102,13 @@ export function ItineraryReveal() {
             <h4 className="font-display text-lg font-semibold text-text-primary">
               Love this trip?
             </h4>
-            <Button variant="cta" fullWidth className="gap-2">
+            <Button variant="cta" fullWidth className="gap-2" onClick={handleRequestTrip}>
               <MessageCircle className="w-4 h-4" />
               Request This Trip
             </Button>
-            <Button variant="outline" fullWidth className="gap-2">
-              <Share2 className="w-4 h-4" />
-              Share Trip
+            <Button variant="outline" fullWidth className="gap-2" onClick={handleShareTrip}>
+              {shareStatus ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
+              {shareStatus || 'Share Trip'}
             </Button>
             <Button variant="ghost" fullWidth className="gap-2" onClick={resetQuiz}>
               <RotateCcw className="w-4 h-4" />
